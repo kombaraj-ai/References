@@ -1,0 +1,97 @@
+
+Create Lambda Function
+    Lambda -> Functions -> Create function "sme_assistant" (lambda_function.py)
+        Configuration -> Timeout -> 2 mins
+        Configuration -> Execution Role -> Provide Permissions policies to access 'Bedrock' Service
+
+
+Create REST API Gateway 
+    1)  API Gateway - REST API -  "equipment_sme"
+            API Endpoint Type - Regional => "Create API"
+        Create Resources:
+            Resources -> "Create Resource"
+                Resource Path - "/" 
+                Resource Name - "sme_assistant"
+            "Create Method" -> Method Type - POST
+                            Lambda Function -> Select the Lambda Function's ARN
+    2) API Gateway Integration Request
+            (Under the POST Method) "Integration Request" -> Edit -> Mapping Templates -> 
+                Content type - application/json
+                Template body - 
+                    { 
+                        "prompt": $input.json('$.prompt') 
+                    }
+    3) Deploy the API 
+       "Deploy API" -> Stage -> New Stage -> "Prod"
+    4) Test the API - UI
+        (Under Resource) -> Test -> Request Body (Provide)
+       Test the API - POSTMAN
+         Stages -> Prod -> Copy 'Invoke URL' (https://vcip4s58jc.execute-api.us-east-1.amazonaws.com/Prod/sme_assistant)
+         Use it in POSTMAN (POST method)
+
+
+Frontend UI with Streamlit
+    cd AWSLamds-UI
+    uv init
+    uv venv
+    .venv\Scripts\activate
+    Update the streamlit_app.py with API Gateway URL (https://vcip4s58jc.execute-api.us-east-1.amazonaws.com/Prod/sme_assistant)
+    streamlit run .\streamlit_app.py
+
+Observability with CloudWatch
+    Create Log Group
+        CloudWatch -> Log management -> Create log group "eqipment_sme_assistant_logs"
+    Enable Model Invocation logging
+        Amazon Bedrock -> Settings -> Model invocation logging -> 
+            Cloudwatch Logs only "eqipment_sme_assistant_logs"
+            Service Role -> Create New Role "eqipment_sme_assistant"
+            "Save Settings"
+    Invoke the Model again. Verify Logs and Metrics.
+    Create SNS 
+        SNS -> Topic -> Create Topic "eqipment_sme_assistant"
+            Type - Standard -> "Create Topic"
+            "Create Subscription" -> 
+                Protocol - Email
+                Endpoint - you@email.com
+                (Goto your email box and confirm)
+            
+
+    Create Alarm 
+        CloudWatch -> Metrics -> Select 'InvocationClientErrors' metric -> Create Alarm
+                    Statistic - Sum
+                    Period - 5 mins
+                    Threshold value - 1
+                Notification
+                    Alarm State Trigger - In Alarm
+                    Select an existing SNS Topic - "eqipment_sme_assistant"
+                Alarm Name - "eqipment_sme_assistant_alarm"
+                "Create Alarm"
+    Test the Alarm
+        Make some mistake in the Model invocation
+            Update incorrect in "schemaVersion": "messages-v12345" in 'request_body" - Lambda
+            Deploy the Lambda
+            Invoke the Model
+    
+Responsible AI with Bedrock Guardrails
+    Create Guardrail 
+        Bedrock -> Guardrails ->  "eqipment_sme_assistant_guardrail"
+            Message for blocked prompts - "Sorry, Can't Answer"
+            Content Filters
+            Denied Topics
+                Create Topic -> "No_Financial_advice"
+                    Description - "If user asks questions related to financial recommendations, the prompt should be blocked"
+                Denied topic tier - Classic
+            Word Filters
+                Profanity Filter - Enable Filter Profanity
+            Sensitive Information Filters
+                Personally Identifiable Information (PII) types
+            Contextual Grounding Check
+            Automated Reasoning Check
+    Test the Guardrail - UI
+        Enter prompt and test 
+    Create Version
+        Guardrail -> "Create Version"
+    Test the Guardrail - Lambda
+        Update Guardrail ID and Version in Invoke_Model method in Lambda Function
+        Enter prompt and test 
+    

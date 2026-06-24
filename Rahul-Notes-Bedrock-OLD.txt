@@ -1,0 +1,246 @@
+
+
+Use Case 1 - Generate Poster Design for Media Industry using  API Gateway, S3 and Stable Diffusion Foundation Model
+
+Create S3 bucket - "customimagedesign001"
+Create Lambda Function - "customImageDesignFunction"
+	Set timeout to 2 mins
+	Provide Bedrock Full Access, S3 Full Access
+	Copy & Paste the code "customImageDesignFunction.py"
+	
+	Watch the CloudWatch Log of Lambda on each step
+Create API Gateway - REST API - "customImageAPI"
+	Create Resoutce - Resource name "generateCustomImage"
+	Create Method - GET
+	Lambda Integration with "customImageDesignFunction" function
+	Method request settings
+		Request validator -> Select "Validate query string parameters and headers"
+	URL query string parameters
+		Name - "prompt"
+		Required - True
+	Integration Request
+		Mapping Templates -> 
+		   Content type - application/json
+		   Template body - 
+				{
+				  "prompt":"$input.params('prompt')"
+				}
+	Deploy API - Dev
+	Test API
+Test the API using Postman or Browser
+	https://7ga46j0sri.execute-api.us-west-2.amazonaws.com/dev/generateCustomImage?prompt='A winding river through a snowy forest in 4K, illuminated by soft winter sunlight, with tree shadows across the snow and icy reflections.'
+	https://7ga46j0sri.execute-api.us-west-2.amazonaws.com/dev/generateCustomImage?prompt='magical realism photo portrait, morning light, 25-something woman, hipster fashion, pensive, candid'
+	https://7ga46j0sri.execute-api.us-west-2.amazonaws.com/dev/generateCustomImage?prompt='scene of a giant ancient tortoise with a fantasy city built on it's back. The tortoise's shell is covered in lush, dense forest with towering trees and a hidden, misty village nestled in the foliage. The city consists of intricately designed buildings that blend seamlessly with the natural environment, featuring rope bridges connecting different sections of the city.'
+	
+Clean up
+	Delete API 
+	Delete S3 bucket
+	Delete Lambda
+
+--------------------------------------------------------------------------------------------------------------------
+Use Case 2 - Text Summarization for Manufacturing Industry using API Gateway, S3 and Cohere Foundation Model
+Create Lambda Function - "demoManufacturing"
+	Set timeout to 2 mins
+	Provide Bedrock Full Access, S3 Full Access
+	Copy & Paste the code "PythonCode_Lambda_demoManufacturing.py"
+
+Create API Gateway - REST API -  "demoManufacturingAPI"
+	Route - POST /demoManufacturing
+	Lambda Integration with "demoManufacturing" function
+	URL query string parameters
+		Name - "prompt"
+		Required - True
+	Method request settings
+		Request validator -> Select "Validate query string parameters and headers"
+	Integration Request
+		Mapping Templates -> 
+		   Content type - application/json
+		   Template body - 
+				{
+				  "prompt":"$input.params('prompt')"
+				}
+	Deploy API - Dev
+	Test API
+Test the API using Postman
+
+
+
+Use Case 3 - Build a Chatbot using Amazon Bedrock - Llama 2, Langchain and Streamlit.
+Pre-requisites:
+	VS Code
+	Python
+	AWS CLI (aws configure - profile)
+	Anaconda Navigator
+	Boto3
+		pip install boto3
+		pip show boto3
+	Langchain
+		pip install langchain=0.0.200
+		pip show langchain	
+	Streamlit
+		pip install streamlit
+		streamlit hello
+	
+Chatbot Backend:
+	chatbot_backend.py
+	
+Chatbot Frontend:	
+	chatbot_frontend.py
+	streamlit run chatbot_frontend.py
+	
+Use Case 4- Build an Employee HR Q & A Application with Retrieval Augmented Generation (RAG) -
+
+                      Claude FM + Langchain (Ochestrator)+ FAISS (Vector DB) + Streamlit
+
+Pre-requisites
+pip install boto3
+pip show boto3
+
+pip install langchain=0.0.200
+pip show langchain
+
+pip install streamlit
+streamlit hello
+
+pip3 install flask-sqlalchemy
+pip install pypdf
+
+pip install faiss-gpu
+(or)
+pip install faiss-cpu
+
+Create "rag_backend.py"
+Create "rag_frontend.py"
+$ streamlit run rag_frontend.py
+
+
+Use Case 5 - Serverless e-Learning App using Bedrock Knowledge Base + Claude FM + AWS Lambda + API Gateway
+
+Create S3 bucket - "udemyknowledgebase"
+	Upload all AWS Documentation PDFs
+
+Create Knowledgebase
+	Bedrock -> Knowledgebase -> "udemy_bedrock_KB"
+		IAM Role - Create or Use existing one
+		Choose the S3 bucket created "udemyknowledgebase"
+		Select the Embedding Model
+		Selct Vector Database -> Quick create new Vector Store (Amazon OpenSearch)
+		"Sync" the Knowledgebase
+	Test Knowledgebase
+		Select Model -> Anthropic Claude
+
+Create Lambda Function - "udemyknowledgebase-function"
+	Set timeout 2 mins
+	Provide "Bedrock_FullAccess" permission
+	Copy & Paste the code - "lambda_function.py"
+	Test the Lambda
+	If any error with "boto3.client('bedrock-agent-runtime')"
+		Upgrade boto3
+			Create a lib folder by running the following command:
+				LIB_DIR=boto3-mylayer/python
+				mkdir -p $LIB_DIR
+			Install the library to LIB_DIR by running the following command:
+				pip3 install boto3 -t $LIB_DIR
+			Zip all the dependencies to /tmp/boto3-mylayer.zip by running the following command:
+				cd boto3-mylayer
+				zip -r /tmp/boto3-mylayer.zip .
+			Publish the layer by running the following command:
+				aws lambda publish-layer-version --layer-name boto3-mylayer --zip-file fileb:///tmp/boto3-mylayer.zip
+			The command returns the new layer's Amazon Resource Name (ARN), similar to the following one:
+
+				arn:aws:lambda:region:$ACC_ID:layer:boto3-mylayer:1
+			To attach this layer to your lambda execute the following:
+
+				aws lambda update-function-configuration --function-name <name-of-your-lambda> --layers <layer ARN>
+			To verify the boto version in your lambda you can simply add the following two print commands in your lambda:
+
+				print(boto3.__version__)
+				print(botocore.__version__)		
+Create API Gateway - REST API -  "eLearningKB"
+	Route - GET /eLearning
+	Lambda Integration with "udemyknowledgebase-function" function
+	URL query string parameters
+		Name - "prompt"
+		Required - True
+	Method request settings
+		Request validator -> Select "Validate query string parameters and headers"
+	Integration Request
+		Mapping Templates -> 
+		   Content type - application/json
+		   Template body - 
+				{
+				  "prompt":"$input.params('prompt')"
+				}
+	Deploy API - Dev
+	Test API
+Test the API using Postman
+
+Clean up
+	Delete Knowledgebase created
+	Delete OpenSearch
+		Amazon OpenSearch -> Serverless -> Select the collection and delete
+		
+		
+Use Case 6 - Build a Retail Banking Agent using Amazon Bedrock Agents and Knowledge Bases -
+
+                          Claude Sonnet + AWS Lambda + DynamoDB + Bedrock Agents + Knowledge Bases + OpenAPI Schema
+
+Create DynamoDB Table - "customerAccountStatus"
+	Partition Key - AccountID - Number
+	AccountName
+	AccountStatus
+	Reason
+	
+	Create few records.
+Create Lambda Function - "newBankAccountStatus" - lambda_function_retail_banking.py
+	Timeout - 2 mins
+	Provide "AmazonDynamoDBFullAccess"
+Define OpenAPI Schema
+	"newBankAccountStatus.yaml"
+	Create S3 bucket "accountstatusopenapi" and upload the OpenAPI schema file
+Create Bedrock Agent 
+	Agent Name - "bankofchicago-agent"
+	Description - This agent will help customer with status of their recently opened bank account
+	Create or use existing role
+	Select Model - Claude 3 Sonnet
+	Instructions for the agent - You are a banking assistant in a retail bank. You are friendly and polite. You help customer queries by providing bank customers status on their new bank accounts.
+	"Save & Exit"
+	"Prepare"
+	Edit the Agent
+	Action Group - "action-group-demoagent"
+		Action GRoup Type -> Select "Define with API schemas"
+		Select the Lambda function "newBankAccountStatus"
+		Action Group Schema -> Select the S3 bucket "accountstatusopenapi" where the API schema uploaded
+	"Prepare"
+	Provide access to the Agent to invoke Lambda Function
+		Lambda Function -> Permission ->  Resource based policy statements -> Add Permission -> AWS Service -> Other (Bedrock not available as of now)
+						Statement ID: bedrock-agent
+						Principal: bedrock.amazonaws.com
+						Source ARN: <ARN of the Agent>
+						Action: lambdaInvokeFunction
+						
+	# AWS Documentation - Lambda Input event from Amazon Bedrock and Response back
+						
+	
+	
+Bedrock agent and Knowledgebase Integration
+    Create S3 bucket "retailbankings3" and upload the PDF
+	Bedrock -> Orchestration -> Knowledgebase -> "knowledgebase-retail"
+		Select the S3 bucket
+		Select Embedding Model
+	Edit Bedrock agent -> Add Knowledgebase -> 
+							Select the KB created
+							KB instructions for the agent: Bedrock agent will utilize the knowledge base for any queries from the customer related to the reason for his AccountID status as pending
+	"Save and Exit" -> "Prepare"
+	Test the agent
+
+Use Case 7 - Amazon Q Business - Build a Marketing Manager App with Amazon Q Business
+
+Use Case 8 - Amazon Q Developer - Overview of the Code Generation capabilities of Amazon Q Developer - Over the SDLC
+
+
+
+
+
+
+https://github.com/aws-samples/intelligent-rag-bedrockagent-iac

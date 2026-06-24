@@ -1,0 +1,88 @@
+
+
+
+
+Section 1 - Course Overview
+    Introduction
+    Agentic AI Roadmap on AWS
+
+
+Section 2 - Amazon Bedrock AgentCore - Key Building Blocks
+
+Section 3 - Building Agentic AI App
+
+    ............1. Pre-Requisites................
+
+    1. VSCode - https://code.visualstudio.com/download
+    2. Install Python ---> Recommended: 3.11.9 (3.10 to 3.13) - https://www.python.org/downloads/
+    3. Install AWS CLI --- > https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html
+    4. Setup IAM Role for AWS CLI
+    5. [Optional Step - Ignore this step] - Download C++ compiler for VSCode ---- https://code.visualstudio.com/docs/cpp/config-mingw
+    ....................................................................
+
+    ......2. CrewAI Installation---> https://docs.crewai.com/installation................
+    pip install uv
+    uv --version
+    uv tool install crewai
+    uv tool install crewai-cli
+    uv tool list
+    uv tool update-shell (One time to set the path)
+    .......................................................................
+
+    .........3. Create Project............
+    cd 3-Build-Agentic-AI-App
+    crewai create crew vacation_planner
+    Select 9 (Bedrock)
+    Bedrock Model in .env  -----> Should have access to Model (Check from console)
+    Set Access Key, Secret Key, region-us.west-2
+    cd vacation_planner
+    uv venv
+    .\.venv\Scripts\activate
+    uv add crewai crewai-tools boto3 streamlit
+    uv lock
+    Ctrl+Shift+P => Select Python Interpreter => C:\XXXX\3-Build-Agentic-AI-App\vacation_planner\.venv\Scripts\python.exe
+    Server DEV API:
+        https://serper.dev/
+        kombaraj.official
+        Create API key and update it in .env
+    Update Agent and Task details in YAML
+    Add Tools to Agents in Crew.py
+        from crewai_tools import SerperDevTool
+        from crewai import LLM
+
+    Update Agent and Task details in Crew.py
+    Add input in main.py
+
+    ...........Run the Project.....................
+    Lock dependencies --- > crewai install (uv lock file)
+    Run Command --- > crewai run
+    ............................................
+
+    .......5. UI Install - Streamlit..........
+
+    .......# Changes in case of errors using Amazon Bedrock....https://docs.crewai.com/en/concepts/agents..........
+
+    #1 Imports
+    from crewai import LLM
+
+    #2 Define and plug in the values for LLM and SerperDev
+    serper_dev_tool=SerperDevTool(api_key='9951ae7963727fd049c8ba2bfff0f8a6799cf2c7')
+    llm = LLM (model='bedrock/us.amazon.nova-pro-v1:0') # Donot add region attribute(not supported by Bedrock Nova as it is cross region)
+
+    #3 @agents - for both Agnets
+    llm=llm
+    .....................................
+
+    .........Add Streamlit UI......
+    # Add streamlit file.py
+    # Import class VacationPlanner() in Streamlit file
+
+
+    .....Run Streamlit on Local...........
+    # Run Streamlit File ---- > streamlit run .\streamlitui.py
+
+
+Section 4 - Building Agentic AI App into Bedrock AgentCore Runtime
+
+
+
